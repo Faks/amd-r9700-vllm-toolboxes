@@ -113,6 +113,11 @@ RUN echo "import sys, re" > patch_vllm.py && \
   echo "txt = p.read_text()" >> patch_vllm.py && \
   echo "txt = re.sub(r'_GCN_ARCH\s*=\s*_get_gcn_arch\(\)', '_GCN_ARCH = \"gfx1201\"', txt)" >> patch_vllm.py && \
   echo "p.write_text(txt)" >> patch_vllm.py && \
+  # Patch 5: spinloop.cpp - Fix mwaitxintrin.h include for ROCm Clang 23
+  echo "p = Path('csrc/spinloop.cpp')" >> patch_vllm.py && \
+  echo "txt = p.read_text()" >> patch_vllm.py && \
+  echo "txt = txt.replace('#include <mwaitxintrin.h>', '#include <x86intrin.h>')" >> patch_vllm.py && \
+  echo "p.write_text(txt)" >> patch_vllm.py && \
   echo "print('Successfully patched vLLM for R9700')" >> patch_vllm.py && \
   python patch_vllm.py
 
@@ -124,7 +129,7 @@ ENV VLLM_TARGET_DEVICE="rocm"
 ENV PYTORCH_ROCM_ARCH="gfx1201"
 ENV HIP_ARCHITECTURES="gfx1201"          
 ENV AMDGPU_TARGETS="gfx1201"              
-ENV MAX_JOBS="1"
+ENV MAX_JOBS="4"
 
 # --- FIX FOR SEGFAULT ---
 # We force the Host Compiler (CC/CXX) to be the ROCm Clang, not Fedora GCC.
