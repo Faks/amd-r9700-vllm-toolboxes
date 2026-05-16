@@ -124,7 +124,7 @@ ENV VLLM_TARGET_DEVICE="rocm"
 ENV PYTORCH_ROCM_ARCH="gfx1201"
 ENV HIP_ARCHITECTURES="gfx1201"          
 ENV AMDGPU_TARGETS="gfx1201"              
-ENV MAX_JOBS="4"
+ENV MAX_JOBS="1"
 
 # --- FIX FOR SEGFAULT ---
 # We force the Host Compiler (CC/CXX) to be the ROCm Clang, not Fedora GCC.
