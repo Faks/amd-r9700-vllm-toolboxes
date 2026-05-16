@@ -167,6 +167,16 @@ RUN cmake -S . \
   python -m pip install --no-cache-dir . --no-build-isolation --no-deps && \
   find /opt/venv/lib/python3.12/site-packages/bitsandbytes -type d -name "__pycache__" -prune -exec rm -rf {} +
 
+# --- aiter (ROCm) ---
+# Install from source to pre-compile native extensions at build time.
+# Without this, aiter's JIT system tries to compile module_aiter_enum at
+# runtime and fails with ModuleNotFoundError on gfx1201.
+# The TheRock nightly drops a broken 'hipconfig' shim in the venv that
+# depends on rocm_sdk_core (missing). Remove it so aiter falls through
+# to the real /opt/rocm/bin/hipconfig.
+RUN rm -f /opt/venv/bin/hipconfig && \
+  python -m pip install git+https://github.com/ROCm/aiter.git
+
 # 8. Runtime Configurations
 WORKDIR /opt
 
