@@ -198,6 +198,7 @@ def run_throughput(model, tp_size, backend_name="Default", output_dir=RESULTS_DI
     # ENV Setup: Global + Model Specific
     env = os.environ.copy()
     env["VLLM_DISABLE_COMPILE_CACHE"] = "1"
+    env["NCCL_PROTO"] = "Simple"
     
     # Inject model specific env vars (e.g. for AWQ)
     model_env = MODEL_TABLE[model].get("env", {})

@@ -379,6 +379,7 @@ def configure_and_launch(model_idx, gpu_count):
     # Env Vars
     env = os.environ.copy()
     env["VLLM_DISABLE_COMPILE_CACHE"] = "1"
+    env["NCCL_PROTO"] = "Simple"
     
     if current_attn_backend == "AITER":
         env["VLLM_ROCM_USE_AITER"] = "1"

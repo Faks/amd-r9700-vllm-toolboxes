@@ -101,6 +101,7 @@ def get_vllm_server_cmd(model, tp_size, util, max_len, max_seqs):
     
     # Add model specific env vars
     env = os.environ.copy()
+    env["NCCL_PROTO"] = "Simple"
     env.update(config.get("env", {}))
     
     return cmd, env
