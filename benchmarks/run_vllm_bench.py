@@ -56,21 +56,27 @@ def run_dialog(args):
 def log(msg): print(f"\n[BENCH] {msg}")
 
 def get_gpu_count():
+    """Count discrete AMD GPUs, excluding the iGPU ('AMD Radeon Graphics')."""
     try:
-        # Using rocm-smi --showid to list GPUs. 
-        # Output format: "GPU[0] : Device Name: ..."
-        res = subprocess.run(["rocm-smi", "--showid"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        res = subprocess.run(
+            ["amd-smi", "static", "--json"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
         if res.returncode == 0:
-            target_gpu = "AMD Radeon Graphics"
-            count = 0
-            for line in res.stdout.strip().split('\n'):
-                if "Device Name" in line and target_gpu in line:
-                    count += 1
-            
+            gpus = json.loads(res.stdout)
+            # Filter out iGPU entries
+            count = sum(
+                1 for g in gpus
+                if "AMD Radeon Graphics" not in g.get("market_name", g.get("asic", {}).get("market_name", ""))
+            )
             return count if count > 0 else 1
-        else:
-            log("rocm-smi failed, defaulting to 2 GPUs (Hardcoded Fallback)")
-            return 2
+    except Exception:
+        pass
+
+    # Fallback: try torch
+    try:
+        import torch
+        return torch.cuda.device_count()
     except Exception as e:
         log(f"Error detecting GPUs: {e}, defaulting to 2 GPUs")
         return 2
