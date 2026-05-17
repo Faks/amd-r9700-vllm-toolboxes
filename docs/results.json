@@ -12,7 +12,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 1707.7817903819612
+      "tps_mean": 2038.5198935597405
     },
     {
       "model": "Qwen/Qwen3.5-9B",
@@ -26,7 +26,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 1334.8439744325815
+      "tps_mean": 1587.3098426018114
     },
     {
       "model": "cyankiwi/Qwen3.6-27B-AWQ-INT4",
@@ -40,7 +40,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 281.4873192709527
+      "tps_mean": 312.9303344836761
     },
     {
       "model": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit",
@@ -54,7 +54,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 582.5680383295482
+      "tps_mean": 377.1335167434712
     },
     {
       "model": "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit",
@@ -68,7 +68,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 405.6214656213603
+      "tps_mean": 449.9674562063123
     },
     {
       "model": "cyankiwi/gemma-4-31B-it-AWQ-4bit",
@@ -82,7 +82,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 135.96484883734402
+      "tps_mean": 240.68851561584924
     },
     {
       "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
@@ -96,7 +96,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 2752.824659757913
+      "tps_mean": 3243.5915657395326
     },
     {
       "model": "Qwen/Qwen3.5-9B",
@@ -110,7 +110,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 2178.1571027350997
+      "tps_mean": 2536.163289048668
     },
     {
       "model": "cyankiwi/Qwen3.6-27B-AWQ-INT4",
@@ -124,7 +124,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 515.8843921390413
+      "tps_mean": 600.8571334978504
     },
     {
       "model": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit",
@@ -138,7 +138,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 997.5795248628787
+      "tps_mean": 729.6361109042044
     },
     {
       "model": "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit",
@@ -152,7 +152,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 862.0991832253449
+      "tps_mean": 795.492083416143
     },
     {
       "model": "cyankiwi/gemma-4-31B-it-AWQ-4bit",
@@ -166,7 +166,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 321.43676896910154
+      "tps_mean": 397.79109678888784
     },
     {
       "model": "RedHatAI/Qwen3.6-35B-A3B-FP8",
@@ -180,7 +180,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 739.8552352124602
+      "tps_mean": 916.8160243384674
     },
     {
       "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
@@ -194,7 +194,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 1601.7437899471433
+      "tps_mean": 1768.324777994918
     },
     {
       "model": "Qwen/Qwen3.5-9B",
@@ -208,7 +208,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 1223.0300357608435
+      "tps_mean": 1669.0915902869838
     },
     {
       "model": "cyankiwi/Qwen3.6-27B-AWQ-INT4",
@@ -222,7 +222,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 287.3832817567149
+      "tps_mean": 347.24110807423256
     },
     {
       "model": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit",
@@ -236,7 +236,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 556.7231508935859
+      "tps_mean": 376.62871723002496
     },
     {
       "model": "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit",
@@ -278,7 +278,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 2630.9302519516527
+      "tps_mean": 2985.900943947141
     },
     {
       "model": "Qwen/Qwen3.5-9B",
@@ -292,7 +292,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 2060.239814377944
+      "tps_mean": 2333.362369390044
     },
     {
       "model": "cyankiwi/Qwen3.6-27B-AWQ-INT4",
@@ -306,7 +306,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 482.8840243042816
+      "tps_mean": 574.7321203265412
     },
     {
       "model": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit",
@@ -320,7 +320,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 947.486518382776
+      "tps_mean": 716.7513579873429
     },
     {
       "model": "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit",
@@ -362,7 +362,7 @@
       "backend": "vLLM",
       "error": false,
       "test": "Throughput",
-      "tps_mean": 634.2043287044598
+      "tps_mean": 810.9265403700898
     }
   ]
 }
