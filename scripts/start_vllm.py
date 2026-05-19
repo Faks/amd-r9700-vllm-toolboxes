@@ -240,7 +240,7 @@ def configure_and_launch(model_idx, gpu_count):
     
     clear_cache = True  # Default ON: stale graphs from version upgrades cause crashes
     use_eager = config.get("enforce_eager", False) # Default to model config, usually False
-    attn_backends = ["Triton", "ROCm (CK)", "AITER"]
+    attn_backends = ["Triton", "ROCm (CK)", "AITER Unified"]
     current_attn_backend = "Triton" # Default to Triton
     
     name = model_id.split("/")[-1]
@@ -381,17 +381,26 @@ def configure_and_launch(model_idx, gpu_count):
     env["VLLM_DISABLE_COMPILE_CACHE"] = "1"
     env["NCCL_PROTO"] = "Simple"
     
-    if current_attn_backend == "AITER":
+    if current_attn_backend == "AITER Unified":
         env["VLLM_ROCM_USE_AITER"] = "1"
-        cmd.extend(["--attention-backend", "ROCM_ATTN"])
+        env["VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION"] = "1"
+        # Disable AITER subsystems that use C++/ASM kernels (crash on RDNA4)
+        env["VLLM_ROCM_USE_AITER_MHA"] = "0"
+        env["VLLM_ROCM_USE_AITER_PAGED_ATTN"] = "0"
+        env["VLLM_ROCM_USE_AITER_MOE"] = "0"
+        env["VLLM_ROCM_USE_AITER_LINEAR"] = "0"
+        env["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
+        cmd.extend(["--attention-backend", "ROCM_AITER_UNIFIED_ATTN"])
     elif current_attn_backend == "ROCm (CK)":
-        if "VLLM_ROCM_USE_AITER" in env:
-            del env["VLLM_ROCM_USE_AITER"]
         cmd.extend(["--attention-backend", "ROCM_ATTN"])
-    else: # Triton
-        if "VLLM_ROCM_USE_AITER" in env:
-            del env["VLLM_ROCM_USE_AITER"]
+    else:  # Triton
         cmd.extend(["--attention-backend", "TRITON_ATTN"])
+
+    # RDNA4: disable norm-quant graph fusion that crashes on gfx1201
+    cmd.extend([
+        "--compilation-config",
+        '{"pass_config":{"fuse_norm_quant":false}}'
+    ])
 
     env.update(config.get("env", {}))
 

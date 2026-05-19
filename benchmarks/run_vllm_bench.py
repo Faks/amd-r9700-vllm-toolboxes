@@ -192,14 +192,20 @@ def run_throughput(model, tp_size, backend_name="Default", output_dir=RESULTS_DI
     cmd.extend(dataset_args)
 
     # Explicitly set Attention Backend for every run
-    if backend_name == "AITER-Attn":
-        cmd.extend(["--attention-backend", "ROCM_ATTN"])
+    if backend_name == "AITER-Unified":
+        cmd.extend(["--attention-backend", "ROCM_AITER_UNIFIED_ATTN"])
     elif backend_name == "ROCm-Attn":
         cmd.extend(["--attention-backend", "ROCM_ATTN"])
     else:
         cmd.extend(["--attention-backend", "TRITON_ATTN"])
 
     cmd.extend(["--mm-encoder-attn-backend", "TRITON_ATTN"])
+
+    # RDNA4: disable norm-quant graph fusion that crashes on gfx1201
+    cmd.extend([
+        "--compilation-config",
+        '{"pass_config":{"fuse_norm_quant":false}}'
+    ])
 
     # ENV Setup: Global + Model Specific
     env = os.environ.copy()
@@ -225,7 +231,7 @@ def run_throughput(model, tp_size, backend_name="Default", output_dir=RESULTS_DI
 
 
 def print_summary(tps):
-    print(f"\n{'MODEL':<40} | {'TP':<2} | {'Tag':<15} | {'Triton':<8} | {'ROCm':<8} | {'AITER':<8}")
+    print(f"\n{'MODEL':<40} | {'TP':<2} | {'Tag':<15} | {'Triton':<8} | {'ROCm':<8} | {'AITER-UA':<8}")
     print("-" * 103)
     
     for m in MODELS_TO_RUN:
@@ -392,9 +398,17 @@ if __name__ == "__main__":
             print(f"[DEBUG] Forcing ROCm Env: {rocm_env} + CLI: --attention-backend ROCM_ATTN")
             run_throughput(m, tp, "ROCm-Attn", RESULTS_DIR / "rocm", rocm_env, overrides=overrides)
             
-            # 3. AITER Attention
-            aiter_env = {"VLLM_ROCM_USE_AITER": "1"}
-            print(f"[DEBUG] Forcing AITER Env: {aiter_env} + CLI: --attention-backend ROCM_ATTN")
-            run_throughput(m, tp, "AITER-Attn", RESULTS_DIR / "aiter", aiter_env, overrides=overrides)
+            # 3. AITER Unified Attention
+            aiter_env = {
+                "VLLM_ROCM_USE_AITER": "1",
+                "VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION": "1",
+                "VLLM_ROCM_USE_AITER_MHA": "0",
+                "VLLM_ROCM_USE_AITER_PAGED_ATTN": "0",
+                "VLLM_ROCM_USE_AITER_MOE": "0",
+                "VLLM_ROCM_USE_AITER_LINEAR": "0",
+                "PYTORCH_ALLOC_CONF": "expandable_segments:True",
+            }
+            print(f"[DEBUG] Forcing AITER Env: {aiter_env} + CLI: --attention-backend ROCM_AITER_UNIFIED_ATTN")
+            run_throughput(m, tp, "AITER-Unified", RESULTS_DIR / "aiter", aiter_env, overrides=overrides)
             
     print_summary(valid_tp_args)

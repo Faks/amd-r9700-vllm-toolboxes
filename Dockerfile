@@ -112,11 +112,18 @@ RUN echo "import sys, re" > patch_vllm.py && \
   echo "p = Path('vllm/platforms/rocm.py')" >> patch_vllm.py && \
   echo "txt = p.read_text()" >> patch_vllm.py && \
   echo "txt = re.sub(r'_GCN_ARCH\s*=\s*_get_gcn_arch\(\)', '_GCN_ARCH = \"gfx1201\"', txt)" >> patch_vllm.py && \
+  # Patch 6: rocm.py - Add gfx1201 to _ON_MI3XX to unlock AITER and FP8 Triton paths
+  echo "txt = txt.replace('_ON_MI3XX = any(arch in _GCN_ARCH for arch in [\"gfx942\", \"gfx950\"])', '_ON_MI3XX = any(arch in _GCN_ARCH for arch in [\"gfx942\", \"gfx950\", \"gfx1201\"])')" >> patch_vllm.py && \
   echo "p.write_text(txt)" >> patch_vllm.py && \
   # Patch 5: spinloop.cpp - Fix mwaitxintrin.h include for ROCm Clang 23
   echo "p = Path('csrc/spinloop.cpp')" >> patch_vllm.py && \
   echo "txt = p.read_text()" >> patch_vllm.py && \
   echo "txt = txt.replace('#include <mwaitxintrin.h>', '#include <x86intrin.h>')" >> patch_vllm.py && \
+  echo "p.write_text(txt)" >> patch_vllm.py && \
+  # Patch 7: _aiter_ops.py - Add gfx1201 to AITER arch mapping to prevent KeyError crash
+  echo "p = Path('vllm/_aiter_ops.py')" >> patch_vllm.py && \
+  echo "txt = p.read_text()" >> patch_vllm.py && \
+  echo "txt = txt.replace('IS_AITER_FOUND = is_aiter_found()', 'IS_AITER_FOUND = is_aiter_found()\\n\\n# R9700/RDNA4: map gfx1201 to MI350X in AITER arch detection\\nif IS_AITER_FOUND:\\n    try:\\n        import aiter.ops.triton.utils.arch_info as _arch_info\\n        _arch_info._ARCH_TO_DEVICE[\"gfx1201\"] = \"MI350X\"\\n    except (ImportError, AttributeError):\\n        pass')" >> patch_vllm.py && \
   echo "p.write_text(txt)" >> patch_vllm.py && \
   echo "print('Successfully patched vLLM for R9700')" >> patch_vllm.py && \
   python patch_vllm.py
