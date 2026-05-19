@@ -30,12 +30,12 @@ def patch_vllm():
         if 'sys.modules["amdsmi"]' not in txt:
             txt = header + txt
             
-        txt = re.sub(r'device_type(?:\s*:\s*\w+)?\s*=.*', 'device_type: str = "rocm"', txt)
-        txt = re.sub(r'device_name(?:\s*:\s*\w+)?\s*=.*', 'device_name: str = "gfx1201"', txt)
+        txt = re.sub(r'device_type = .*', 'device_type = "rocm"', txt)
+        txt = re.sub(r'device_name = .*', 'device_name = "gfx1201"', txt)
         
-        # Override get_device_name with classmethod returning 'AMD-gfx1201'
-        if 'AMD-gfx1201' not in txt:
-            txt += '\n    @classmethod\n    def get_device_name(cls, device_id: int = 0) -> str:\n        return "AMD-gfx1201"\n'
+        # Override get_device_name with classmethod returning 'AMD Radeon R9700'
+        if 'AMD Radeon R9700' not in txt:
+            txt += '\n    @classmethod\n    def get_device_name(cls, device_id: int = 0) -> str:\n        return "AMD Radeon R9700"\n'
             
         # Patch 4: rocm.py - Hardcode _GCN_ARCH to bypass MagicMock regex crash
         txt = re.sub(r'_GCN_ARCH\s*=\s*_get_gcn_arch\(\)', '_GCN_ARCH = "gfx1201"', txt)
