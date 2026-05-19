@@ -1,6 +1,6 @@
-# AMD Radeon 9700 AI PRO (gfx1201) — vLLM Toolbox/Container
+# AMD Radeon R9700 AI PRO (gfx1201) — vLLM Toolbox
 
-An **fedora-based** Docker/Podman container that is **Toolbx-compatible** (usable as a Fedora toolbox) for serving LLMs with **vLLM** on **AMD Radeon R9700 (gfx1201)**. Built on the TheRock nightly builds for ROCM.
+A Fedora-based, Toolbx-compatible container for serving LLMs with vLLM on AMD Radeon R9700 (gfx1201) GPUs.
 
 ![Demo](demo.gif)
 
@@ -8,56 +8,30 @@ An **fedora-based** Docker/Podman container that is **Toolbx-compatible** (usabl
 
 ## Table of Contents
 
-* [Tested Models (Benchmarks)](#tested-models-benchmarks)
-* [1) Toolbx vs Docker/Podman](#1-toolbx-vs-dockerpodman)
-* [2) Quickstart — Fedora Toolbx](#2-quickstart--fedora-toolbx)
-* [3) Quickstart — Ubuntu (Distrobox)](#3-quickstart--ubuntu-distrobox)
-* [4) Keeping the Toolbox Up-to-Date](#4-keeping-the-toolbox-up-to-date)
-* [5) Testing the API](#5-testing-the-api)
-* [6) Use a Web UI for Chatting](#6-use-a-web-ui-for-chatting)
-
-
-## Tested Models (Benchmarks)
-
-### 🆕 Update (May 4, 2026): ROCm 7.2.1, RCCL Fix & New Models
-A new version of the vLLM toolbox has been pushed, built on **ROCm 7.2.1**. It includes a critical fix that downgrades **RCCL to version 7.1.1**, working around a known breakage in the current ROCm release. With this update, the toolbox now fully supports the newest open-weight models, including the **Qwen 3.6 family** and **Gemma-4**.
-
-I have updated the [core benchmarks](https://kyuz0.github.io/amd-r9700-vllm-toolboxes/) to reflect the performance of these new models on the R9700. Please note that the [NVIDIA comparison benchmarks](https://kyuz0.github.io/amd-r9700-vllm-toolboxes/compare.html) are still based on the older December 2025 model data, as I was unable to rerun them on the NVIDIA hardware.
-
-View full benchmarks at: [https://kyuz0.github.io/amd-r9700-vllm-toolboxes/](https://kyuz0.github.io/amd-r9700-vllm-toolboxes/)
-
-*Run benchmarks now include a comparison between the default Triton backend and the optional ROCm attention backend.*
-
-
-- `meta-llama/Meta-Llama-3.1-8B-Instruct`
-- `Qwen/Qwen3.5-9B`
-- `cyankiwi/Qwen3.6-27B-AWQ-INT4`
-- `cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit`
-- `cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit`
-- `cyankiwi/gemma-4-31B-it-AWQ-4bit`
-- `RedHatAI/Qwen3.6-35B-A3B-FP8`
-
-### Advanced Tuning
-
-See [TUNING.md](TUNING.md) for a guide on how to enable undervolting and raise the power limit on AMD R9700 cards on Linux to improve performance and efficiency.
-
-
-
+* [Toolbx vs Docker/Podman](#toolbx-vs-dockerpodman)
+* [Quickstart — Fedora Toolbx](#quickstart--fedora-toolbx)
+* [Quickstart — Ubuntu (Distrobox)](#quickstart--ubuntu-distrobox)
+* [Testing the API](#testing-the-api)
+* [Web UI Integration](#web-ui-integration)
+* [Keeping the Toolbox Up-to-Date](#keeping-the-toolbox-up-to-date)
+* [AITER Unified Attention Integration](#aiter-unified-attention-integration)
+* [Benchmarks & Tested Models](#benchmarks--tested-models)
+* [Advanced Tuning](#advanced-tuning)
 
 ---
 
-## 1) Toolbx vs Docker/Podman
+## Toolbx vs Docker/Podman
 
-The `kyuz0/vllm-therock-gfx1201:latest` image can be used both as: 
+The `kyuz0/vllm-therock-gfx1201:latest` image can be used in two modes:
 
-* **Fedora Toolbx (recommended for development):** Toolbx shares your **HOME** and user, so models/configs live on the host. Great for iterating quickly while keeping the host clean. 
-* **Docker/Podman (recommended for deployment/perf):** Use for running vLLM as a service (host networking, IPC tuning, etc.). Always **mount a host directory** for model weights so they stay outside the container.
+* **Fedora Toolbx (development):** Shares the host's `HOME` directory and user environment. Best for local development and rapid iterations.
+* **Docker/Podman (deployment/performance):** Recommended for serving as a background service. Always mount a host directory for caching model weights.
 
 ---
 
-## 2) Quickstart — Fedora Toolbx
+## Quickstart — Fedora Toolbx
 
-Create a toolbox that exposes the GPU and relaxes seccomp to avoid ROCm syscall issues:
+Create a toolbox container with direct GPU access and relaxed security filters:
 
 ```bash
 toolbox create vllm-r9700 \
@@ -66,29 +40,25 @@ toolbox create vllm-r9700 \
   --group-add video --group-add render --security-opt seccomp=unconfined
 ```
 
-Enter it:
+Enter the container:
 
 ```bash
 toolbox enter vllm-r9700
 ```
 
-**Model storage:** Models are downloaded to `~/.cache/huggingface` by default. This directory is shared with the host if you created the toolbox correctly, so downloads persist.
+### Serving a Model
 
-### Serving a Model (Easiest Way)
-
-The toolbox includes a TUI wizard called **`start-vllm`** which includes pre-configured models and handles launch flags. It also allows you to select the experimental **ROCm attention backend**. This is the easiest way to get started.
+Launch the interactive model launcher wizard to select models and configure backends (including AITER):
 
 ```bash
 start-vllm
 ```
 
-> **Cache note:** vLLM writes compiled kernels to `~/.cache/vllm/`.
-
 ---
 
-## 3) Quickstart — Ubuntu (Distrobox)
+## Quickstart — Ubuntu (Distrobox)
 
-Ubuntu’s toolbox package still breaks GPU access, so use Distrobox instead:
+For Ubuntu hosts, use Distrobox to set up the container:
 
 ```bash
 distrobox create -n vllm-r9700 \
@@ -98,10 +68,7 @@ distrobox create -n vllm-r9700 \
 distrobox enter vllm-r9700
 ```
 
-> **Verification:** Run `rocm-smi` to check GPU status.
-
-### Serving a Model
-Same as above, you can use the **`start-vllm`** wizard to launch models easily.
+Verify GPU visibility using `rocm-smi`, then run the launcher:
 
 ```bash
 start-vllm
@@ -109,26 +76,9 @@ start-vllm
 
 ---
 
-## 4) Keeping the Toolbox Up-to-Date
+## Testing the API
 
-The `vllm-therock-gfx1201` image patches and tracks AMD ROCm nightlies. To rapidly recreate your toolbox without losing your host-mounted model weights, use the utility script:
-
-```bash
-# Pull the script to your local host
-curl -O https://raw.githubusercontent.com/kyuz0/amd-r9700-vllm-toolboxes/main/refresh-toolbox.sh
-chmod +x refresh-toolbox.sh
-
-# Run to interactively pull 'stable' (latest tag) or 'dev'
-./refresh-toolbox.sh
-```
-
-This detects Podman/Docker, removes the old container, recreates it with all necessary `seccomp` and GPU volume flags, and prunes orphaned image cache.
-
----
-
-## 5) Testing the API
-
-Once the server is up, hit the OpenAI‑compatible endpoint:
+Verify the OpenAI-compatible endpoint with a prompt request:
 
 ```bash
 curl -X POST http://localhost:8000/v1/chat/completions \
@@ -136,12 +86,11 @@ curl -X POST http://localhost:8000/v1/chat/completions \
   -d '{"model":"Qwen/Qwen2.5-7B-Instruct","messages":[{"role":"user","content":"Hello! Test the performance."}]}'
 ```
 
-You should receive a JSON response with a `choices[0].message.content` reply.
-
-If you don't want to bother specifying the model name, you can run this which will query the currently deployed model:
+Alternatively, query the active model dynamically:
 
 ```bash
-MODEL=$(curl -s http://localhost:8000/v1/models | jq -r '.data[0].id') curl -X POST http://localhost:8000/v1/chat/completions \
+MODEL=$(curl -s http://localhost:8000/v1/models | jq -r '.data[0].id')
+curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d "{
     \"model\": \"$MODEL\",
@@ -151,15 +100,15 @@ MODEL=$(curl -s http://localhost:8000/v1/models | jq -r '.data[0].id') curl -X P
 
 ---
 
-## 6) Use a Web UI for Chatting
+## Web UI Integration
 
-If vLLM is on a remote server, expose port 8000 via SSH port forwarding:
+To expose a remote vLLM endpoint, forward port 8000:
 
 ```bash
 ssh -L 0.0.0.0:8000:localhost:8000 <vllm-host>
 ```
 
-Then, you can start HuggingFace ChatUI like this (on your host):
+Run the Hugging Face ChatUI container locally:
 
 ```bash
 docker run -p 3000:3000 \
@@ -170,3 +119,60 @@ docker run -p 3000:3000 \
   ghcr.io/huggingface/chat-ui-db
 ```
 
+---
+
+## Keeping the Toolbox Up-to-Date
+
+The `vllm-therock-gfx1201` image tracks AMD ROCm nightly builds. To recreate the toolbox without losing downloaded model weights, use the `refresh-toolbox.sh` script:
+
+```bash
+# Download the refresh script
+curl -O https://raw.githubusercontent.com/kyuz0/amd-r9700-vllm-toolboxes/main/refresh-toolbox.sh
+chmod +x refresh-toolbox.sh
+
+# Run script to pull updates and recreate the container
+./refresh-toolbox.sh
+```
+
+The script automatically:
+* Detects the container engine (Docker or Podman).
+* Removes the existing container while preserving the volume mounts and user cache.
+* Recreates the container with the correct GPU devices (`/dev/dri`, `/dev/kfd`), group permissions (`video`, `render`), and seccomp profile (`unconfined`).
+* Prunes orphaned image layers to free disk space.
+
+---
+
+## AITER Unified Attention Integration
+
+The AITER Unified Attention backend (Triton-based kernels) is supported to resolve long-context performance issues on R9700 (gfx1201) hardware.
+
+This integration was inspired by community findings documented in:
+* **[For the 5 people here running vLLM on multiple R9700s, you need to patch in support for AITER Unified Attention](https://www.reddit.com/r/LocalLLaMA/comments/1sxaj8g/for_the_5_people_here_running_vllm_on_multiple/)**
+
+### Technical Changes
+- **Architecture Validation & Aliasing:** Patched vLLM's `rocm.py` to include `gfx1201` in `_ON_MI3XX` (enabling AITER code paths) and aliased `gfx1201` to `MI350X` in the AITER internal architecture map to prevent key errors.
+- **Build-Time hipcc Wrapper:** Modified the Docker build to rename the real `hipcc` binary and replace it with a wrapper that intercepts `--offload-arch=native` and rewrites it to `--offload-arch=gfx1201`. This allows JIT compilation without requiring elevated runtime privileges.
+- **Subsystem Controls:** Configured vLLM to only load Triton-based attention kernels while disabling C++/HIP JIT-compiled subsystems (RMSNorm, FP8BMM, FP4BMM, Triton ROPE) that freeze during compilation on RDNA4.
+- **Tooling & Dashboard:** Updated `start_vllm.py` and `run_vllm_bench.py` to support the `--attention-backend ROCM_AITER_UNIFIED_ATTN` flag and configured the parsed logs and dashboard UI to display AITER benchmarks.
+
+---
+
+## Benchmarks & Tested Models
+
+Core benchmarks comparing Triton, ROCm, and AITER performance on the R9700 are available at:
+👉 **[https://kyuz0.github.io/amd-r9700-vllm-toolboxes/](https://kyuz0.github.io/amd-r9700-vllm-toolboxes/)**
+
+The following models have been tested and verified:
+- `meta-llama/Meta-Llama-3.1-8B-Instruct`
+- `Qwen/Qwen3.5-9B`
+- `cyankiwi/Qwen3.6-27B-AWQ-INT4`
+- `cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit`
+- `cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit`
+- `cyankiwi/gemma-4-31B-it-AWQ-4bit`
+- `RedHatAI/Qwen3.6-35B-A3B-FP8`
+
+---
+
+## Advanced Tuning
+
+See [TUNING.md](TUNING.md) to configure undervolting and raise the power limit on AMD R9700 cards to maximize performance.

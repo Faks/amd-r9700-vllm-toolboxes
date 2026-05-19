@@ -39,7 +39,8 @@ def parse_logs():
     # (Path, variant_tag)
     dirs = [
         (BENCHMARK_DIR, "default"),
-        (Path("../benchmarks/vllm_benchmark_results_16-05-2026/rocm"), "rocm")
+        (Path("../benchmarks/vllm_benchmark_results_16-05-2026/rocm"), "rocm"),
+        (Path("../benchmarks/vllm_benchmark_results_16-05-2026/aiter"), "aiter")
     ]
     
     for b_dir, variant in dirs:

@@ -463,6 +463,7 @@
                     style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-right:6px;">Attention:</span>
                 <label class="check-item"><input type="checkbox" id="chkTriton" checked> Triton</label>
                 <label class="check-item"><input type="checkbox" id="chkROCm"> ROCm</label>
+                <label class="check-item"><input type="checkbox" id="chkAITER" checked> AITER</label>
             </div>
         </div>
 
@@ -530,7 +531,8 @@
                 tp1: true,
                 tp2: true,
                 triton: true,
-                rocm: false
+                rocm: false,
+                aiter: true
             }
         };
 
@@ -599,8 +601,10 @@
                         params: run.params_b || run.name_params_b,
                         tp1: null,
                         tp1_rocm: null,
+                        tp1_aiter: null,
                         tp2: null,
-                        tp2_rocm: null
+                        tp2_rocm: null,
+                        tp2_aiter: null
                     };
                 }
 
@@ -609,10 +613,12 @@
                 // Assign TP value
                 if (run.env === "TP1") {
                     if (run.variant === "rocm") m.tp1_rocm = run.tps_mean;
+                    else if (run.variant === "aiter") m.tp1_aiter = run.tps_mean;
                     else m.tp1 = run.tps_mean;
                 }
                 if (run.env === "TP2") {
                     if (run.variant === "rocm") m.tp2_rocm = run.tps_mean;
+                    else if (run.variant === "aiter") m.tp2_aiter = run.tps_mean;
                     else m.tp2 = run.tps_mean;
                 }
             });
@@ -669,6 +675,7 @@
             bindCheck('chkTP2', 'tp2');
             bindCheck('chkTriton', 'triton');
             bindCheck('chkROCm', 'rocm');
+            bindCheck('chkAITER', 'aiter');
         }
 
         function getBenchmarkMeta(testName) {
@@ -773,10 +780,12 @@
             if (state.view.tp1) {
                 if (state.view.triton) headerHTML += '<th class="col-data">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">Triton</span></th>';
                 if (state.view.rocm) headerHTML += '<th class="col-data" style="background:#fefce8;">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">ROCm</span></th>';
+                if (state.view.aiter) headerHTML += '<th class="col-data" style="background:#f0fdf4;">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">AITER</span></th>';
             }
             if (state.view.tp2) {
                 if (state.view.triton) headerHTML += '<th class="col-data">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">Triton</span></th>';
                 if (state.view.rocm) headerHTML += '<th class="col-data" style="background:#fefce8;">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">ROCm</span></th>';
+                if (state.view.aiter) headerHTML += '<th class="col-data" style="background:#f0fdf4;">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">AITER</span></th>';
             }
 
             headerHTML += '</tr>';
@@ -806,10 +815,12 @@
                 if (state.view.tp1) {
                     if (state.view.triton) rowHTML += `<td class="col-data">${formatVal(m.tp1, unit)}</td>`;
                     if (state.view.rocm) rowHTML += `<td class="col-data" style="background:#fffbeb;">${formatVal(m.tp1_rocm, unit)}</td>`;
+                    if (state.view.aiter) rowHTML += `<td class="col-data" style="background:#f0fdf4;">${formatVal(m.tp1_aiter, unit)}</td>`;
                 }
                 if (state.view.tp2) {
                     if (state.view.triton) rowHTML += `<td class="col-data">${formatVal(m.tp2, unit)}</td>`;
                     if (state.view.rocm) rowHTML += `<td class="col-data" style="background:#fffbeb;">${formatVal(m.tp2_rocm, unit)}</td>`;
+                    if (state.view.aiter) rowHTML += `<td class="col-data" style="background:#f0fdf4;">${formatVal(m.tp2_aiter, unit)}</td>`;
                 }
 
                 tr.innerHTML = rowHTML;
