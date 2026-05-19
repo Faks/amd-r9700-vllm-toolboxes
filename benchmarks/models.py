@@ -49,7 +49,8 @@ MODEL_TABLE = {
         "max_num_seqs": "32",
         "max_tokens": "16384",
         "ctx": "20480",
-        "language_model_only": True
+        "language_model_only": True,
+        "enforce_eager": True
     },
 
     "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit": {

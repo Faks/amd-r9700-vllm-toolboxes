@@ -223,11 +223,26 @@ def run_throughput(model, tp_size, backend_name="Default", output_dir=RESULTS_DI
     try: 
         subprocess.run(cmd, check=True, env=env)
     except Exception as e: 
-        log(f"ERROR: Failed {model} [{backend_name}]")
-        try:
-            with open(output_file, 'w') as f:
-                json.dump({"error": "Failed"}, f)
-        except: pass
+        # Check if the output file was successfully written and contains valid throughput results
+        # despite the process exiting with a non-zero status (e.g., GC/weakref crash on exit)
+        is_success = False
+        if output_file.exists():
+            try:
+                with open(output_file, 'r') as f:
+                    data = json.load(f)
+                    if isinstance(data, dict) and "throughput" in data:
+                        is_success = True
+            except:
+                pass
+        
+        if is_success:
+            log(f"SUCCESS (GC warning ignored): {model} [{backend_name}] output generated successfully.")
+        else:
+            log(f"ERROR: Failed {model} [{backend_name}]")
+            try:
+                with open(output_file, 'w') as f:
+                    json.dump({"error": "Failed"}, f)
+            except: pass
 
 
 def print_summary(tps):
