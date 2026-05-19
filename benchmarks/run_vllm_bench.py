@@ -402,10 +402,15 @@ if __name__ == "__main__":
             aiter_env = {
                 "VLLM_ROCM_USE_AITER": "1",
                 "VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION": "1",
+                # Disable C++/HIP JIT subsystems (hang/crash on RDNA4 gfx1201)
                 "VLLM_ROCM_USE_AITER_MHA": "0",
                 "VLLM_ROCM_USE_AITER_PAGED_ATTN": "0",
                 "VLLM_ROCM_USE_AITER_MOE": "0",
                 "VLLM_ROCM_USE_AITER_LINEAR": "0",
+                "VLLM_ROCM_USE_AITER_RMSNORM": "0",
+                "VLLM_ROCM_USE_AITER_FP8BMM": "0",
+                "VLLM_ROCM_USE_AITER_FP4BMM": "0",
+                "VLLM_ROCM_USE_AITER_TRITON_ROPE": "0",
                 "PYTORCH_ALLOC_CONF": "expandable_segments:True",
             }
             print(f"[DEBUG] Forcing AITER Env: {aiter_env} + CLI: --attention-backend ROCM_AITER_UNIFIED_ATTN")

@@ -187,6 +187,12 @@ RUN rm -f /opt/venv/bin/hipconfig && \
 # 8. Runtime Configurations
 WORKDIR /opt
 
+# Install hipcc wrapper: intercepts --offload-arch=native and rewrites to gfx1201
+# This is required for AITER JIT compilation and any runtime hipcc invocations.
+RUN mv /opt/rocm/bin/hipcc /opt/rocm/bin/hipcc.real && \
+  printf '#!/bin/bash\n# R9700 hipcc wrapper: forces single-arch gfx1201 compilation\nargs=()\nfor arg in "$@"; do\n    args+=("${arg//--offload-arch=native/--offload-arch=gfx1201}")\ndone\nexec /opt/rocm/bin/hipcc.real "${args[@]}"\n' > /opt/rocm/bin/hipcc && \
+  chmod 755 /opt/rocm/bin/hipcc
+
 COPY scripts/01-rocm-envs.sh /etc/profile.d/01-rocm-envs.sh
 COPY scripts/99-toolbox-banner.sh /etc/profile.d/99-toolbox-banner.sh
 COPY scripts/zz-venv-last.sh /etc/profile.d/zz-venv-last.sh

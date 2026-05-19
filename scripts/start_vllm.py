@@ -68,44 +68,6 @@ def find_r9700():
         print("[!] Could not detect R9700 via rocm-smi, defaulting to HIP_VISIBLE_DEVICES=0")
         os.environ["HIP_VISIBLE_DEVICES"] = "0"
 
-def fix_multi_gpu_jit():
-    """
-    Replaces /opt/rocm/bin/hipcc with a wrapper script that intercepts
-    --offload-arch=native and rewrites it to --offload-arch=gfx1201
-    before forwarding to the real compiler.
-
-    This is the nuclear option. The Python source constructs the flag
-    dynamically (f-strings, variables), so sed can never match it.
-    The only reliable interception point is hipcc itself.
-    """
-    real_hipcc = "/opt/rocm/bin/hipcc.real"
-    hipcc = "/opt/rocm/bin/hipcc"
-
-    if os.path.exists(real_hipcc):
-        print("[*] hipcc wrapper already installed from previous run.")
-        return
-
-    print("[*] Installing hipcc wrapper: --offload-arch=native → --offload-arch=gfx1201")
-    try:
-        # Move real hipcc out of the way
-        os.rename(hipcc, real_hipcc)
-
-        # Write wrapper
-        with open(hipcc, "w") as f:
-            f.write("#!/bin/bash\n")
-            f.write("# R9700 hipcc wrapper: forces single-arch gfx1201 compilation\n")
-            f.write('args=()\n')
-            f.write('for arg in "$@"; do\n')
-            f.write('    args+=("${arg//--offload-arch=native/--offload-arch=gfx1201}")\n')
-            f.write('done\n')
-            f.write('exec /opt/rocm/bin/hipcc.real "${args[@]}"\n')
-
-        os.chmod(hipcc, 0o755)
-        print("[*] hipcc wrapper installed successfully.")
-    except PermissionError:
-        print("[!] Cannot patch hipcc (permission denied). Try: sudo start-vllm")
-    except Exception as e:
-        print(f"[!] hipcc patch failed: {e}")
 
 def detect_gpus():
     """Detects AMD GPUs via rocm-smi or /dev/dri."""
@@ -349,8 +311,6 @@ def configure_and_launch(model_idx, gpu_count):
     # Build Command
     subprocess.run(["clear"])
     
-    # Patch aiter source FIRST, then nuke caches so fresh build uses patched source
-    fix_multi_gpu_jit()
     
     if clear_cache:
         nuke_vllm_cache()
@@ -384,11 +344,15 @@ def configure_and_launch(model_idx, gpu_count):
     if current_attn_backend == "AITER Unified":
         env["VLLM_ROCM_USE_AITER"] = "1"
         env["VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION"] = "1"
-        # Disable AITER subsystems that use C++/ASM kernels (crash on RDNA4)
+        # Disable AITER subsystems that use C++/HIP JIT kernels (hang/crash on RDNA4)
         env["VLLM_ROCM_USE_AITER_MHA"] = "0"
         env["VLLM_ROCM_USE_AITER_PAGED_ATTN"] = "0"
         env["VLLM_ROCM_USE_AITER_MOE"] = "0"
         env["VLLM_ROCM_USE_AITER_LINEAR"] = "0"
+        env["VLLM_ROCM_USE_AITER_RMSNORM"] = "0"
+        env["VLLM_ROCM_USE_AITER_FP8BMM"] = "0"
+        env["VLLM_ROCM_USE_AITER_FP4BMM"] = "0"
+        env["VLLM_ROCM_USE_AITER_TRITON_ROPE"] = "0"
         env["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
         cmd.extend(["--attention-backend", "ROCM_AITER_UNIFIED_ATTN"])
     elif current_attn_backend == "ROCm (CK)":
