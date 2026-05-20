@@ -53,6 +53,35 @@ def patch_1_init_py(txt: str) -> str:
     )
     txt = txt.replace("amdsmi.amdsmi_init()", "pass")
     txt = txt.replace("amdsmi.amdsmi_shut_down()", "pass")
+
+    # Add monkeypatch for PyTorch shutdown cache clearing crash
+    monkeypatch = (
+        "\n\n"
+        "# Monkeypatch torch.library._clear_torch_ops_cache and _del_library to prevent shutdown crashes\n"
+        "try:\n"
+        "    import torch.library\n"
+        "    if hasattr(torch.library, '_clear_torch_ops_cache'):\n"
+        "        _orig_clear_cache = torch.library._clear_torch_ops_cache\n"
+        "        def _safe_clear_torch_ops_cache(op_defs):\n"
+        "            try:\n"
+        "                _orig_clear_cache(op_defs)\n"
+        "            except Exception:\n"
+        "                pass\n"
+        "        torch.library._clear_torch_ops_cache = _safe_clear_torch_ops_cache\n"
+        "    if hasattr(torch.library, '_del_library'):\n"
+        "        _orig_del_library = torch.library._del_library\n"
+        "        def _safe_del_library(*args, **kwargs):\n"
+        "            try:\n"
+        "                _orig_del_library(*args, **kwargs)\n"
+        "            except Exception:\n"
+        "                pass\n"
+        "        torch.library._del_library = _safe_del_library\n"
+        "except Exception:\n"
+        "    pass\n"
+    )
+    if "safe_clear_torch_ops_cache" not in txt:
+        txt += monkeypatch
+
     return txt
 
 
