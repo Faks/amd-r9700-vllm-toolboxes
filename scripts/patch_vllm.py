@@ -68,7 +68,7 @@ def patch_2_rocm_py_mock(txt: str) -> str:
         txt = header + txt
 
     # Force device_type and device_name attributes
-    txt = re.sub(r'device_type\s*:\s*str\s*=\s*"[^"]*"', 'device_type: str = "rocm"', txt)
+    txt = re.sub(r'device_type\s*:\s*str\s*=\s*"[^"]*"', 'device_type: str = "cuda"', txt)
     txt = re.sub(r'device_name\s*:\s*str\s*=\s*"[^"]*"', 'device_name: str = "gfx1201"', txt)
 
     # Override get_device_name — MUST return "AMD-gfx1201" for AITER JIT
