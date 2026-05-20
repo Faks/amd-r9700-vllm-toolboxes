@@ -91,7 +91,7 @@ MODEL_TABLE = {
 
     "RedHatAI/Qwen3.6-27B-FP8": {
         "trust_remote": True,
-        "valid_tp": [1,2],
+        "valid_tp": [2],
         "max_num_seqs": "32",
         "max_tokens": "16384",
         "ctx": "32768",
