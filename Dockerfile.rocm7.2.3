@@ -1,6 +1,6 @@
 # Multi-stage vLLM Toolbox Build for gfx1201 (Ubuntu-based)
 
-ARG BASE_IMAGE="docker.io/kyuz0/pytorch-toolbox-gfx1201:v2.11.0-rocm-7.2.1"
+ARG BASE_IMAGE="docker.io/kyuz0/pytorch-toolbox-gfx1201:v2.11.0-rocm-7.2.3"
 ARG MAX_JOBS=""
 
 ############# rocm_base #############
@@ -112,7 +112,7 @@ RUN --mount=type=bind,from=build_fa,src=/dist/,target=/dist_fa \
     pip3 install git+https://github.com/ROCm/aiter.git && \
     pip3 cache purge
 
-# Custom RCCL injection disabled for stable ROCm 7.2.1 flow.
+# Custom RCCL injection disabled for stable ROCm 7.2.3 flow.
 
 # Install hipcc wrapper: intercepts --offload-arch=native and rewrites to gfx1201
 # This is required for AITER JIT compilation and any runtime hipcc invocations.

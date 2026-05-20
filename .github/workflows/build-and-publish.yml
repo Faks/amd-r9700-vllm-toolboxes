@@ -15,10 +15,10 @@ on:
         description: "Which Dockerfile to build"
         required: true
         type: choice
-        default: "Dockerfile.rocm7.2.1"
+        default: "Dockerfile"
         options:
-          - Dockerfile.rocm7.2.1
           - Dockerfile
+          - Dockerfile.rocm7.2.3
 
 env:
   IMAGE_REPO: kyuz0/vllm-therock-gfx1201

@@ -3,7 +3,7 @@
 patch_vllm.py  –  Build-time patches for AMD Radeon R9700 (gfx1201)
 
 Run this script from the root of a freshly cloned vLLM repository.
-It is called by both Dockerfile and Dockerfile.rocm7.2.1 via:
+It is called by both Dockerfile and Dockerfile.rocm7.2.3 via:
 
     COPY scripts/patch_vllm.py patch_vllm.py
     RUN python3 patch_vllm.py
