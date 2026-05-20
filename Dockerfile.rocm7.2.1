@@ -28,6 +28,7 @@ ENV HIP_FORCE_DEV_KERNARG=1
 ENV RAY_EXPERIMENTAL_NOSET_ROCR_VISIBLE_DEVICES=1
 ENV HIP_DEVICE_LIB_PATH=/opt/rocm/amdgcn/bitcode
 ENV VLLM_HOST_IP=127.0.0.1
+ENV PYTHONNOUSERSITE=1
 # LD_PRELOAD for ubuntu packaging of tcmalloc is moved to final stage
 
 ############# Fetch Sources Phase #############
