@@ -56,10 +56,10 @@
         /* Controls */
         .controls {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 24px;
             background: var(--bg-card);
-            padding: 16px;
+            padding: 12px 16px;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
@@ -85,8 +85,20 @@
 
         .search {
             flex: 1;
-            min-width: 200px;
-            max-width: 320px;
+            min-width: 180px;
+            max-width: 220px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 12px center;
+            background-size: 16px;
+            padding-left: 36px;
+        }
+
+        .filters-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         /* Section Cards */
@@ -405,27 +417,40 @@
         .filter-group {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 0 12px;
+            gap: 8px;
+            padding: 0 4px 0 12px;
             border-left: 1px solid var(--border);
         }
 
         .check-item {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
             cursor: pointer;
             user-select: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .check-item input[type="checkbox"] {
             accent-color: var(--primary);
+            margin: 0;
         }
 
         .check-item:hover {
             color: var(--text-main);
+            background: #f3f4f6;
+        }
+
+        .check-item:has(input:checked) {
+            color: var(--primary);
+            background: var(--primary-bg);
+            border-color: rgba(239, 68, 68, 0.15);
+            font-weight: 500;
         }
     </style>
 </head>
@@ -453,18 +478,20 @@
             <select id="quantFilter">
                 <option value="">All Quantizations</option>
             </select>
-            <div class="filter-group">
-                <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-right:6px;">GPUs:</span>
-                <label class="check-item"><input type="checkbox" id="chkTP1" checked> TP1</label>
-                <label class="check-item"><input type="checkbox" id="chkTP2" checked> TP2</label>
-            </div>
+            <div class="filters-wrapper">
+                <div class="filter-group">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-right:6px;">GPUs:</span>
+                    <label class="check-item"><input type="checkbox" id="chkTP1" checked> TP1</label>
+                    <label class="check-item"><input type="checkbox" id="chkTP2" checked> TP2</label>
+                </div>
 
-            <div class="filter-group">
-                <span
-                    style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-right:6px;">Attention:</span>
-                <label class="check-item"><input type="checkbox" id="chkTriton" checked> Triton</label>
-                <label class="check-item"><input type="checkbox" id="chkROCm"> ROCm</label>
-                <label class="check-item"><input type="checkbox" id="chkAITER" checked> AITER</label>
+                <div class="filter-group">
+                    <span
+                        style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-right:6px;">Attention:</span>
+                    <label class="check-item"><input type="checkbox" id="chkTriton" checked> Triton</label>
+                    <label class="check-item"><input type="checkbox" id="chkROCm"> ROCm</label>
+                    <label class="check-item"><input type="checkbox" id="chkAITER" checked> AITER</label>
+                </div>
             </div>
         </div>
 
