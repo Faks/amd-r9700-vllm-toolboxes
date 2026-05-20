@@ -87,6 +87,16 @@ MODEL_TABLE = {
         "enforce_eager": True,
         "gpu_util": "0.90",
         "kv_cache_dtype": "fp8"
+    },
+
+    "RedHatAI/Qwen3.6-27B-FP8": {
+        "trust_remote": True,
+        "valid_tp": [1,2],
+        "max_num_seqs": "32",
+        "max_tokens": "16384",
+        "ctx": "32768",
+        "language_model_only": True,
+        "gpu_util": "0.95"
     }
 }
 
@@ -97,5 +107,6 @@ MODELS_TO_RUN = [
     "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit",
     "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit",
     "cyankiwi/gemma-4-31B-it-AWQ-4bit",
-    "RedHatAI/Qwen3.6-35B-A3B-FP8"
+    "RedHatAI/Qwen3.6-35B-A3B-FP8",
+    "RedHatAI/Qwen3.6-27B-FP8"
 ]
