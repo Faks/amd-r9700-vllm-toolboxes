@@ -85,20 +85,6 @@
       "tps_mean": 232.92737591664232
     },
     {
-      "model": "RedHatAI/Qwen3.6-27B-FP8",
-      "model_clean": "RedHatAI/Qwen3.6-27B-FP8",
-      "env": "TP1",
-      "variant": "default",
-      "gpu_config": "single",
-      "quant": "FP8",
-      "params_b": 27.0,
-      "name_params_b": 27.0,
-      "backend": "vLLM",
-      "error": true,
-      "test": "Throughput",
-      "tps_mean": 0
-    },
-    {
       "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
       "model_clean": "meta-llama/Meta-Llama-3.1-8B-Instruct",
       "env": "TP2",

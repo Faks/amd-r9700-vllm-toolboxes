@@ -216,6 +216,11 @@
             color: var(--primary);
         }
 
+        .best-cell {
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+        }
+
         /* Modal/Overlay */
         #loading {
             text-align: center;
@@ -807,18 +812,27 @@
 
             if (state.view.tp1) {
                 if (state.view.triton) headerHTML += '<th class="col-data">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">Triton</span></th>';
-                if (state.view.rocm) headerHTML += '<th class="col-data" style="background:#fefce8;">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">ROCm</span></th>';
-                if (state.view.aiter) headerHTML += '<th class="col-data" style="background:#f0fdf4;">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">AITER</span></th>';
+                if (state.view.rocm) headerHTML += '<th class="col-data">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">ROCm</span></th>';
+                if (state.view.aiter) headerHTML += '<th class="col-data">TP1<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">AITER</span></th>';
             }
             if (state.view.tp2) {
                 if (state.view.triton) headerHTML += '<th class="col-data">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">Triton</span></th>';
-                if (state.view.rocm) headerHTML += '<th class="col-data" style="background:#fefce8;">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">ROCm</span></th>';
-                if (state.view.aiter) headerHTML += '<th class="col-data" style="background:#f0fdf4;">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">AITER</span></th>';
+                if (state.view.rocm) headerHTML += '<th class="col-data">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">ROCm</span></th>';
+                if (state.view.aiter) headerHTML += '<th class="col-data">TP2<br><span style="font-weight:400; font-size:0.85em; text-transform:none;">AITER</span></th>';
             }
 
             headerHTML += '</tr>';
             thead.innerHTML = headerHTML;
             table.appendChild(thead);
+
+            // Determine if higher value is better performance
+            const isHigherBetter = !state.activeTab.includes("TTFT") && !state.activeTab.includes("TPOT");
+            const isValid = v => v !== null && v !== undefined && v !== 0;
+            const getBestVal = (vals) => {
+                if (vals.length === 0) return null;
+                return isHigherBetter ? Math.max(...vals) : Math.min(...vals);
+            };
+            const activeBackendsCount = (state.view.triton ? 1 : 0) + (state.view.rocm ? 1 : 0) + (state.view.aiter ? 1 : 0);
 
             const tbody = document.createElement('tbody');
             models.forEach(m => {
@@ -832,6 +846,30 @@
                 // Values
                 const unit = meta ? meta.unit : "";
 
+                // Calculate best TP1 and TP2 values among active/visible backends
+                const tp1Vals = [];
+                if (state.view.tp1) {
+                    if (state.view.triton && isValid(m.tp1)) tp1Vals.push(m.tp1);
+                    if (state.view.rocm && isValid(m.tp1_rocm)) tp1Vals.push(m.tp1_rocm);
+                    if (state.view.aiter && isValid(m.tp1_aiter)) tp1Vals.push(m.tp1_aiter);
+                }
+                const bestTp1 = activeBackendsCount > 1 ? getBestVal(tp1Vals) : null;
+
+                const tp2Vals = [];
+                if (state.view.tp2) {
+                    if (state.view.triton && isValid(m.tp2)) tp2Vals.push(m.tp2);
+                    if (state.view.rocm && isValid(m.tp2_rocm)) tp2Vals.push(m.tp2_rocm);
+                    if (state.view.aiter && isValid(m.tp2_aiter)) tp2Vals.push(m.tp2_aiter);
+                }
+                const bestTp2 = activeBackendsCount > 1 ? getBestVal(tp2Vals) : null;
+
+                const getCellClass = (val, bestVal) => {
+                    if (bestVal !== null && isValid(val) && val === bestVal) {
+                        return "col-data best-cell";
+                    }
+                    return "col-data";
+                };
+
                 let rowHTML = `
                 <td>
                     <div class="model-cell">
@@ -841,14 +879,14 @@
                 </td>`;
 
                 if (state.view.tp1) {
-                    if (state.view.triton) rowHTML += `<td class="col-data">${formatVal(m.tp1, unit)}</td>`;
-                    if (state.view.rocm) rowHTML += `<td class="col-data" style="background:#fffbeb;">${formatVal(m.tp1_rocm, unit)}</td>`;
-                    if (state.view.aiter) rowHTML += `<td class="col-data" style="background:#f0fdf4;">${formatVal(m.tp1_aiter, unit)}</td>`;
+                    if (state.view.triton) rowHTML += `<td class="${getCellClass(m.tp1, bestTp1)}">${formatVal(m.tp1, unit)}</td>`;
+                    if (state.view.rocm) rowHTML += `<td class="${getCellClass(m.tp1_rocm, bestTp1)}">${formatVal(m.tp1_rocm, unit)}</td>`;
+                    if (state.view.aiter) rowHTML += `<td class="${getCellClass(m.tp1_aiter, bestTp1)}">${formatVal(m.tp1_aiter, unit)}</td>`;
                 }
                 if (state.view.tp2) {
-                    if (state.view.triton) rowHTML += `<td class="col-data">${formatVal(m.tp2, unit)}</td>`;
-                    if (state.view.rocm) rowHTML += `<td class="col-data" style="background:#fffbeb;">${formatVal(m.tp2_rocm, unit)}</td>`;
-                    if (state.view.aiter) rowHTML += `<td class="col-data" style="background:#f0fdf4;">${formatVal(m.tp2_aiter, unit)}</td>`;
+                    if (state.view.triton) rowHTML += `<td class="${getCellClass(m.tp2, bestTp2)}">${formatVal(m.tp2, unit)}</td>`;
+                    if (state.view.rocm) rowHTML += `<td class="${getCellClass(m.tp2_rocm, bestTp2)}">${formatVal(m.tp2_rocm, unit)}</td>`;
+                    if (state.view.aiter) rowHTML += `<td class="${getCellClass(m.tp2_aiter, bestTp2)}">${formatVal(m.tp2_aiter, unit)}</td>`;
                 }
 
                 tr.innerHTML = rowHTML;
