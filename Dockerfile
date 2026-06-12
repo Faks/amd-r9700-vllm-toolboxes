@@ -85,7 +85,7 @@ COPY scripts/patch_vllm.py patch_vllm.py
 RUN python patch_vllm.py
 
 # 7. Build vLLM (Wheel Method) with CLANG Host Compiler
-RUN python -m pip install --upgrade cmake ninja packaging wheel numpy "setuptools-scm>=8" "setuptools<80.0.0" scikit-build-core pybind11
+RUN python -m pip install --upgrade cmake ninja packaging wheel numpy "setuptools-scm>=8" "setuptools<80.0.0" scikit-build-core pybind11 setuptools-rust
 ENV ROCM_HOME="/opt/rocm"
 ENV HIP_PATH="/opt/rocm"
 ENV VLLM_TARGET_DEVICE="rocm"
