@@ -110,6 +110,7 @@ RUN --mount=type=bind,from=build_fa,src=/dist/,target=/dist_fa \
     --mount=type=bind,from=build_bnb,src=/dist/,target=/dist_bnb \
     pip3 install /dist_fa/*.whl /dist_vllm/*.whl /dist_bnb/*.whl -r /app/vllm/requirements/rocm.txt && \
     pip3 install git+https://github.com/ROCm/aiter.git && \
+    chmod a+w $(python3 -c "import pathlib,aiter; print(pathlib.Path(aiter.__file__).parent / 'jit')") && \
     pip3 cache purge
 
 # Custom RCCL injection disabled for stable ROCm 7.2.3 flow.

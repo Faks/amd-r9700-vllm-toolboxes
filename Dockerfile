@@ -138,7 +138,8 @@ RUN cmake -S . \
 # depends on rocm_sdk_core (missing). Remove it so aiter falls through
 # to the real /opt/rocm/bin/hipconfig.
 RUN rm -f /opt/venv/bin/hipconfig && \
-  python -m pip install git+https://github.com/ROCm/aiter.git
+  python -m pip install git+https://github.com/ROCm/aiter.git && \
+  chmod a+w /opt/venv/lib64/python3.12/site-packages/aiter/jit/
 
 # 8. Runtime Configurations
 WORKDIR /opt

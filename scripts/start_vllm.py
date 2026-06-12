@@ -169,7 +169,7 @@ def run_dialog(args):
             return None # User cancelled
 
 def nuke_vllm_cache():
-    """Removes vLLM cache directory to fix potential graph/incompatibility issues."""
+    """Removes vLLM/Triton/Aiter cache directories to fix potential graph/incompatibility issues."""
     cache = Path.home() / ".cache" / "vllm"
     triton_cache = Path.home() / ".triton" / "cache"
     aiter_cache = Path.home() / ".aiter"
@@ -182,6 +182,24 @@ def nuke_vllm_cache():
                 print(" Done.")
             except Exception as e:
                 print(f" Failed: {e}")
+
+def fix_aiter_jit_permissions():
+    """Ensure the aiter JIT package directory is writable.
+    
+    In toolbox containers the aiter package dir is owned by root from the
+    image build. The JIT system compiles .so modules to ~/.aiter/ then needs
+    to register them back in site-packages/aiter/jit/. If that directory
+    isn't writable, the import silently fails with ModuleNotFoundError.
+    """
+    try:
+        import aiter
+        jit_dir = Path(aiter.__file__).parent / "jit"
+        if jit_dir.is_dir() and not os.access(jit_dir, os.W_OK):
+            print(f"[*] Fixing aiter JIT permissions on {jit_dir}...", end="", flush=True)
+            subprocess.run(["sudo", "chmod", "a+w", str(jit_dir)], check=True)
+            print(" Done.")
+    except (ImportError, Exception):
+        pass  # aiter not installed or chmod failed — non-fatal
 
 def configure_and_launch(model_idx, gpu_count):
     model_id = MODELS_TO_RUN[model_idx]
@@ -314,6 +332,8 @@ def configure_and_launch(model_idx, gpu_count):
     
     if clear_cache:
         nuke_vllm_cache()
+    
+    fix_aiter_jit_permissions()
     
     cmd = [
         "vllm", "serve", model_id,
