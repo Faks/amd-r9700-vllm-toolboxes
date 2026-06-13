@@ -139,7 +139,19 @@ RUN cmake -S . \
 # to the real /opt/rocm/bin/hipconfig.
 RUN rm -f /opt/venv/bin/hipconfig && \
   python -m pip install git+https://github.com/ROCm/aiter.git && \
-  chmod a+w /opt/venv/lib64/python3.12/site-packages/aiter/jit/
+
+# 9. Install Custom RCCL (gfx1201) - Replaces standard library with manually built one
+# Built by the build-rccl.yml workflow. Re-run that workflow to refresh the artifact
+# when PyTorch adds new NCCL symbols (e.g. ncclCommResume).
+COPY custom_libs/librccl.so.1.gz /tmp/librccl.so.1.gz
+RUN echo "Installing Custom RCCL..." && \
+  gzip -d /tmp/librccl.so.1.gz && \
+  chmod 755 /tmp/librccl.so.1 && \
+  # Replace /opt/rocm library strictly
+  cp -fv /tmp/librccl.so.1 /opt/rocm/lib/librccl.so.1.0 && \
+  # Replace /opt/venv library
+  find /opt/venv -name "librccl.so*" -type f -exec cp -fv /tmp/librccl.so.1 {} + && \
+  rm /tmp/librccl.so.1
 
 # 8. Runtime Configurations
 WORKDIR /opt

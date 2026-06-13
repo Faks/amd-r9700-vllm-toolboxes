@@ -36,9 +36,10 @@ jobs:
       - name: Build RCCL for gfx1201
         run: |
           export PATH=/opt/rocm/bin:/opt/rocm/llvm/bin:$PATH
-          mkdir -p /opt/rccl-custom
-          cd /opt/rccl-custom
-          git clone --recursive https://github.com/ROCm/rccl.git .
+          mkdir -p /opt/rocm-systems
+          cd /opt/rocm-systems
+          git clone --recursive https://github.com/ROCm/rocm-systems.git .
+          cd projects/rccl
           mkdir -p build && cd build
           
           # Fix typo in RCCL fallback stub for SymkGetKernelPtr (missing 'k')
@@ -58,7 +59,7 @@ jobs:
 
       - name: Compress Artifact
         run: |
-          cd /opt/rccl-custom/build/install/lib
+          cd /opt/rocm-systems/projects/rccl/build/install/lib
           ls -lh librccl.so.1
           gzip -c librccl.so.1 > /tmp/librccl.so.1.gz
 
