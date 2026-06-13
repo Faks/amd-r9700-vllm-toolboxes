@@ -233,6 +233,21 @@ def patch_9_int8_utils(txt: str) -> str:
     return txt.replace(target, replacement)
 
 
+def patch_10_moe_wna16(txt: str) -> str:
+    """Fix tp_size AttributeError on RoutedExperts.
+
+    vLLM refactored FusedMoE and moved tp_size out of RoutedExperts (the
+    weight container) into FusedMoEConfig.  But moe_wna16_weight_loader
+    still accesses `layer.tp_size` which crashes AWQ MoE models (Qwen3.5
+    etc.) that fall back from AWQMoeMarlin to the WNA16 path.
+    Fix: use get_tp_group().world_size which is always available.
+    https://github.com/vllm-project/vllm/issues/45403
+    """
+    if 'layer.tp_size' not in txt:
+        return txt  # already patched or not applicable
+    return txt.replace('layer.tp_size', 'get_tp_group().world_size')
+
+
 # ── Main ──────────────────────────────────────────────────────────────
 
 
@@ -278,6 +293,13 @@ def main():
         "vllm/model_executor/layers/quantization/utils/int8_utils.py",
         "MI300X INT8 config fallback",
         patch_9_int8_utils,
+    )
+
+    # Patch 10: moe_wna16.py tp_size fix (vllm#45403)
+    _patch(
+        "vllm/model_executor/layers/quantization/moe_wna16.py",
+        "layer.tp_size -> get_tp_group().world_size",
+        patch_10_moe_wna16,
     )
 
     print()
