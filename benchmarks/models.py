@@ -16,7 +16,11 @@ MODEL_TABLE = {
         "valid_tp": [1,2],
         "max_num_seqs": "64",
         "max_tokens": "32768",
-        "ctx": "65536"
+        "ctx": "65536",
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "llama3_json",
+        ]
     },
 
     # 2. Qwen 3.5 9B (Native FP16)
@@ -26,7 +30,12 @@ MODEL_TABLE = {
         "max_num_seqs": "64",
         "max_tokens": "32768",
         "ctx": "65536",
-        "language_model_only": True
+        "language_model_only": True,
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "qwen3_coder",
+            "--reasoning-parser", "qwen3",
+        ]
     },
 
     # 3. Qwen 3.5 27B (Native FP16) — tight fit on 1x32GB
@@ -39,7 +48,12 @@ MODEL_TABLE = {
         "ctx": "20480",
         "language_model_only": True,
         "enforce_eager": True,
-        "gpu_util": "0.95"
+        "gpu_util": "0.95",
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "qwen3_coder",
+            "--reasoning-parser", "qwen3",
+        ]
     },
 
     # 4. Qwen 3.5 35B AWQ (VL Model forced to Language Only)
@@ -50,7 +64,12 @@ MODEL_TABLE = {
         "max_tokens": "16384",
         "ctx": "20480",
         "language_model_only": True,
-        "enforce_eager": True
+        "enforce_eager": True,
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "qwen3_coder",
+            "--reasoning-parser", "qwen3",
+        ]
     },
 
     "cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit": {
@@ -62,7 +81,12 @@ MODEL_TABLE = {
         "language_model_only": True,
         "enforce_eager": True,
         "gpu_util": "0.90",
-        "kv_cache_dtype": "fp8"
+        "kv_cache_dtype": "fp8",
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "gemma4",
+            "--reasoning-parser", "gemma4",
+        ]
     },
 
     "cyankiwi/gemma-4-31B-it-AWQ-4bit": {
@@ -74,7 +98,12 @@ MODEL_TABLE = {
         "language_model_only": True,
         "enforce_eager": True,
         "gpu_util": "0.90",
-        "kv_cache_dtype": "fp8"
+        "kv_cache_dtype": "fp8",
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "gemma4",
+            "--reasoning-parser", "gemma4",
+        ]
     },
 
     "RedHatAI/Qwen3.6-35B-A3B-FP8": {
@@ -86,7 +115,12 @@ MODEL_TABLE = {
         "language_model_only": True,
         "enforce_eager": True,
         "gpu_util": "0.90",
-        "kv_cache_dtype": "fp8"
+        "kv_cache_dtype": "fp8",
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "qwen3_coder",
+            "--reasoning-parser", "qwen3",
+        ]
     },
 
     "RedHatAI/Qwen3.6-27B-FP8": {
@@ -96,7 +130,12 @@ MODEL_TABLE = {
         "max_tokens": "16384",
         "ctx": "32768",
         "language_model_only": True,
-        "gpu_util": "0.95"
+        "gpu_util": "0.95",
+        "extra_flags": [
+            "--enable-auto-tool-choice",
+            "--tool-call-parser", "qwen3_coder",
+            "--reasoning-parser", "qwen3",
+        ]
     }
 }
 

@@ -222,6 +222,7 @@ def configure_and_launch(model_idx, gpu_count):
     use_eager = config.get("enforce_eager", False) # Default to model config, usually False
     attn_backends = ["Triton", "ROCm (CK)", "AITER Unified"]
     current_attn_backend = "Triton" # Default to Triton
+    current_extra_flags = list(config.get("extra_flags", []))  # Copy so edits don't mutate config
     
     name = model_id.split("/")[-1]
     
@@ -229,10 +230,14 @@ def configure_and_launch(model_idx, gpu_count):
         cache_status = "YES" if clear_cache else "NO"
         eager_status = "YES" if use_eager else "NO"
         
+        extra_flags_display = ' '.join(current_extra_flags) if current_extra_flags else '(none)'
+        # Truncate display for menu readability
+        extra_flags_short = (extra_flags_display[:40] + '...') if len(extra_flags_display) > 43 else extra_flags_display
+
         menu_args = [
             "--clear", "--backtitle", f"AMD R9700 vLLM Launcher (GPUs: {gpu_count})",
             "--title", f"Configuration: {name}",
-            "--menu", "Customize Launch Parameters:", "22", "65", "9",
+            "--menu", "Customize Launch Parameters:", "24", "70", "10",
             "1", f"Tensor Parallelism:   {current_tp}",
             "2", f"Concurrent Requests:  {current_seqs}",
             "3", f"Context Length:       {current_ctx} (Verified)",
@@ -240,7 +245,8 @@ def configure_and_launch(model_idx, gpu_count):
             "5", f"Attention Backend:    {current_attn_backend}",
             "6", f"Erase vLLM Cache:     {cache_status}",
             "7", f"Force Eager Mode:     {eager_status}",
-            "8", "LAUNCH SERVER"
+            "8", f"Extra vLLM Flags:     {extra_flags_short}",
+            "9", "LAUNCH SERVER"
         ]
         
         choice = run_dialog(menu_args)
@@ -323,6 +329,19 @@ def configure_and_launch(model_idx, gpu_count):
             use_eager = not use_eager
              
         elif choice == "8":
+            # Edit Extra vLLM Flags
+            current_str = ' '.join(current_extra_flags)
+            new_flags = run_dialog([
+                "--title", "Extra vLLM Flags",
+                "--inputbox",
+                "Edit extra flags (space-separated, passed directly to vllm serve).\n"
+                "Clear the field to remove all extra flags.",
+                "12", "70", current_str
+            ])
+            if new_flags is not None:  # None = cancelled
+                current_extra_flags = new_flags.split() if new_flags.strip() else []
+              
+        elif choice == "9":
             # Launch
             break
             
@@ -356,6 +375,10 @@ def configure_and_launch(model_idx, gpu_count):
     if "kv_cache_dtype" in config:
         cmd.extend(["--kv-cache-dtype", config["kv_cache_dtype"]])
     
+    # Extra vLLM flags (from models.py defaults + user edits)
+    if current_extra_flags:
+        cmd.extend(current_extra_flags)
+
     # Env Vars
     env = os.environ.copy()
     env["VLLM_DISABLE_COMPILE_CACHE"] = "1"
@@ -405,6 +428,8 @@ def configure_and_launch(model_idx, gpu_count):
         
     if clear_cache:
         print(f" Action:    Clearing vLLM/Triton Caches")
+    if current_extra_flags:
+        print(f" Extras:    {' '.join(current_extra_flags)}")
         
     # Variables that represent the custom environment overrides for models
     custom_env = config.get("env", {})
